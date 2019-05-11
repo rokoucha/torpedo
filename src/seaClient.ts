@@ -152,13 +152,13 @@ export default class SeaClient {
    *
    * @param authCode {string} authorization_code
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<string>} access_token
    */
-  public async authorize(authCode: string): Promise<void> {
+  public async authorize(authCode: string): Promise<string> {
     const res = await this.axios.post<Authorization>(
-      `/oauth/authorize?client_id=${
-        this.auth.clientId
-      }&response_type=code&state=${this.auth.stateText}`,
+      `/oauth/token?client_id=${this.auth.clientId}&response_type=code&state=${
+        this.auth.stateText
+      }`,
       {
         client_id: this.auth.clientId,
         client_secret: this.auth.clientSecret,
@@ -172,6 +172,8 @@ export default class SeaClient {
     this.axios.defaults.headers.common['Authorization'] = `${
       this.auth.token_type
     } ${this.auth.access_token}`
+
+    return res.data.access_token
   }
 
   /**

@@ -80,26 +80,35 @@ export default class SeaClient {
   /**
    * Constructor
    *
-   * @param accessToken {string} Application's acccess token
-   * @param clientId {string} Application's client id
-   * @param clientSecret {string} Application's client id
-   * @param endpoint {string} API FQDN
+   * @param {string} endpoint API FQDN
+   * @param {Object} params Params
+   * @param {string} params.accessToken Application's acccess token
+   * @param {string} params.clientId Application's client id
+   * @param {string} params.clientSecret Application's client id
+   * @param {string} params.tokenType Access token type(default: Bearer)
    */
   constructor(
-    accessToken: string,
-    clientId: string,
-    clientSecret: string,
     endpoint: string,
-    tokenType: string = 'Bearer'
+    {
+      accessToken,
+      clientId,
+      clientSecret,
+      tokenType
+    }: {
+      accessToken?: string
+      clientId?: string
+      clientSecret?: string
+      tokenType?: string
+    } = {}
   ) {
     this.endpoint = new URL(`https://${endpoint}`).href
 
     this.auth = <Authorization>{
-      access_token: accessToken,
-      clientId,
-      clientSecret,
+      access_token: accessToken || '',
+      clientId: clientId || '',
+      clientSecret: clientSecret || '',
       stateText: this.getStateText(),
-      token_type: tokenType
+      token_type: tokenType || 'Bearer'
     }
 
     this.axios = axios.create({

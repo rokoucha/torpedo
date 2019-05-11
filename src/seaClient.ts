@@ -54,7 +54,7 @@ export interface User {
  * User settings
  */
 export interface UserSettings {
-  screenName: string
+  name: string
 }
 
 /**

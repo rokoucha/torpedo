@@ -192,16 +192,13 @@ export default class SeaClient {
   /**
    * Get timeline
    *
-   * @param sinceId {number | null} id
-   * @param count {number| null} count
+   * @param sinceId {number} id
+   * @param count {number} count
    *
    * @returns {Promise<Post[]>}
    */
-  public async getTimeline(
-    sinceId: number | null,
-    count: number | null
-  ): Promise<Post[]> {
-    const res = await this.axios.get<Post[]>(`/api/v1/1`, {
+  public async getTimeline(sinceId?: number, count?: number): Promise<Post[]> {
+    const res = await this.axios.get<Post[]>(`/api/v1/timelines/public`, {
       params: {
         sinceId,
         count

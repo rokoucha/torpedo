@@ -138,13 +138,13 @@ export default class SeaClient {
    *
    * @returns {string}
    */
-  public getAuthorizeUrl(): URL {
+  public getAuthorizeUrl(): string {
     return new URL(
       `/oauth/authorize?client_id=${
         this.auth.clientId
       }&response_type=code&state=${this.auth.stateText}`,
       this.endpoint
-    )
+    ).href
   }
 
   /**

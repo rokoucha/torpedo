@@ -150,7 +150,7 @@ export default class SeaClient {
   /**
    * Authorize with authorization code
    *
-   * @param authCode {string} authorization_code
+   * @param {string} authCode authorization_code
    *
    * @returns {Promise<string>} access_token
    */
@@ -179,7 +179,7 @@ export default class SeaClient {
   /**
    * Post
    *
-   * @param post {Body} post body
+   * @param {Body} post post body
    *
    * @returns {Promise<Post>}
    */
@@ -192,8 +192,8 @@ export default class SeaClient {
   /**
    * Get timeline
    *
-   * @param sinceId {number} id
-   * @param count {number} count
+   * @param {number} sinceId id
+   * @param {number} count count
    *
    * @returns {Promise<Post[]>}
    */
@@ -211,7 +211,7 @@ export default class SeaClient {
   /**
    * Change user settings
    *
-   * @param setting {UserSettings} user settings
+   * @param {UserSettings} setting user settings
    *
    * @returns {Promise<User>}
    */

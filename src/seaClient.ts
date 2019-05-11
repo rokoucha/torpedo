@@ -72,7 +72,7 @@ export interface Account {
 /**
  * SeaClient
  */
-export class SeaClient {
+export default class SeaClient {
   private axios: AxiosInstance
   private endpoint: string
   private auth: Authorization

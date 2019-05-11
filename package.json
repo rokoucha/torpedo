@@ -25,6 +25,7 @@
   "scripts": {
     "lint": "eslint src/** --ext .ts,.tsx",
     "lint:fix": "yarn lint --fix",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
     "dev": "ts-node src/index.ts",
     "clean": "rimraf dist/*",
     "tsc": "tsc",

@@ -184,10 +184,7 @@ export default class SeaClient {
    * @returns {Promise<Post>}
    */
   public async post(post: Body): Promise<Post> {
-    const res = await this.axios.post<Post>(
-      '/api/v1/posts',
-      JSON.stringify(post)
-    )
+    const res = await this.axios.post<Post>('/api/v1/posts', post)
 
     return res.data
   }
@@ -222,10 +219,7 @@ export default class SeaClient {
    * @returns {Promise<User>}
    */
   public async postUserSettings(setting: UserSettings): Promise<User> {
-    const res = await this.axios.patch<User>(
-      `/api/v1/account`,
-      JSON.stringify(setting)
-    )
+    const res = await this.axios.patch<User>(`/api/v1/account`, setting)
 
     return res.data
   }

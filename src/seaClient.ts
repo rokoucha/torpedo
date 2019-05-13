@@ -2,11 +2,30 @@ import $ from 'cafy'
 import axios, { AxiosInstance } from 'axios'
 
 /**
- * Validate date string
+ * Validator for cafy
  */
-const isValidDate = $.str.pipe(
-  (str: string): boolean => !isNaN(new Date(str).getTime())
-)
+class Validator {
+  /**
+   * Validate date string
+   */
+  public static isValidDate = $.str.pipe(
+    (str: string): boolean => !isNaN(new Date(str).getTime())
+  )
+
+  /**
+   * Validate url string
+   */
+  public static isValidUrl = $.str.pipe(
+    (str: string): boolean => {
+      try {
+        new URL(str)
+        return true
+      } catch (error) {
+        return false
+      }
+    }
+  )
+}
 
 /**
  * Application
@@ -93,7 +112,7 @@ export class File {
     extension: string
     type: string
     size: number
-    url: string
+    url: URL
     mime: string
   }[]
 
@@ -113,7 +132,7 @@ export class File {
           extension: $.str,
           type: $.str,
           size: $.num,
-          url: $.str,
+          url: Validator.isValidUrl,
           mime: $.str
         })
       )
@@ -130,7 +149,17 @@ export class File {
 
     this.id = file.id
     this.name = file.name
-    this.variants = file.variants
+    this.variants = file.variants.map(variant => {
+      return {
+        id: variant.id,
+        score: variant.score,
+        extension: variant.extension,
+        type: variant.type,
+        size: variant.size,
+        url: new URL(variant.url),
+        mime: variant.mime
+      }
+    })
   }
 }
 
@@ -154,17 +183,17 @@ export class Post {
   private validate(post: Partial<Post>) {
     return $.obj({
       application: $.any,
-      createdAt: isValidDate,
+      createdAt: Validator.isValidDate,
       id: $.num,
-      text: $.str,
-      updatedAt: isValidDate,
+      text: $.str.max(512),
+      updatedAt: Validator.isValidDate,
       user: $.any,
       files: $.arr($.any)
     }).throw(post)
   }
 
   /**
-   * Make Account object
+   * Constructor
    *
    * @param {Partial<Post>} p object
    */
@@ -179,9 +208,7 @@ export class Post {
     this.user = new User(post.user)
     this.files = []
 
-    post.files.forEach(file => {
-      this.files.push(new File(file))
-    })
+    this.files = post.files.map(file => new File(file))
   }
 }
 
@@ -199,7 +226,7 @@ export class PostBody {
    */
   private validate(postBody: Partial<PostBody>) {
     return $.obj({
-      text: $.str,
+      text: $.str.max(512),
       fileIds: $.optional.array($.num)
     }).throw(postBody)
   }
@@ -235,12 +262,12 @@ export class User {
    */
   private validate(account: Partial<User>) {
     return $.obj({
-      createdAt: isValidDate,
+      createdAt: Validator.isValidDate,
       id: $.num,
-      name: $.str,
+      name: $.str.range(1, 20),
       postsCount: $.num,
-      screenName: $.str,
-      updatedAt: isValidDate
+      screenName: $.str.match(/^[0-9a-zA-Z_]{1,20}$/),
+      updatedAt: Validator.isValidDate
     }).throw(account)
   }
 
@@ -274,7 +301,7 @@ export class UserSettings {
    */
   private validate(userSettings: Partial<UserSettings>) {
     return $.obj({
-      name: $.str
+      name: $.str.range(1, 20)
     }).throw(userSettings)
   }
 
@@ -378,6 +405,9 @@ export default class SeaClient {
    * @returns {Promise<string>} access_token
    */
   public async authorize(authCode: string): Promise<string> {
+    if (this.auth.clientId === '') throw Error('clientId is not set')
+    if (this.auth.clientSecret === '') throw Error('clientSecret is not set')
+
     const res = await this.axios.post<Authorization>(
       `/oauth/token?client_id=${this.auth.clientId}&response_type=code&state=${
         this.auth.stateText
@@ -421,6 +451,11 @@ export default class SeaClient {
    * @returns {Promise<Post[]>}
    */
   public async getTimeline(sinceId?: number, count?: number): Promise<Post[]> {
+    if (count !== undefined && count > 100)
+      throw new Error('count must be less than or equal to 100')
+    if (count !== undefined && count < 1)
+      throw new Error('count must be greater than or equal to 1')
+
     const res = await this.axios.get(`/api/v1/timelines/public`, {
       params: {
         sinceId,

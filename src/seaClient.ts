@@ -1,8 +1,10 @@
 import { ReadStream } from 'fs'
 import $ from 'cafy'
 import axios, { AxiosInstance } from 'axios'
-import FormData from 'form-data'
 import crypto from 'crypto'
+import { EventEmitter } from 'events'
+import FormData from 'form-data'
+import WebSocket from 'ws'
 
 /**
  * Validator for cafy
@@ -488,5 +490,93 @@ export default class SeaClient {
     })
 
     return new File(res.data)
+  }
+
+  /**
+   * Stream
+   *
+   * @param {string} stream Stream name
+   *
+   * @returns {EventEmitter}
+   */
+  public stream(stream: string): EventEmitter {
+    const eventEmitter = new EventEmitter()
+
+    /**
+     * Close
+     *
+     * @param {number} code close code
+     * @param {string} reason reason
+     */
+    const close = (code: number, reason: string) => {
+      eventEmitter.emit('close', { code, reason })
+    }
+
+    /**
+     * Error
+     *
+     * @param {Error} error error
+     */
+    const error = (error: Error) => {
+      throw error
+    }
+
+    /**
+     * Receive message
+     *
+     * @param {string} data messsage
+     */
+    const message = (data: string) => {
+      try {
+        const message = JSON.parse(data)
+
+        switch (message.type) {
+          case 'message':
+            eventEmitter.emit('message', new Post(<Post>message.content))
+            break
+          case 'ping':
+            ws.send(
+              JSON.stringify({
+                type: 'ping'
+              })
+            )
+            break
+          case 'success':
+            eventEmitter.emit('connect')
+            break
+          case 'error':
+          default:
+            throw new Error(data)
+        }
+      } catch (e) {
+        throw new Error(JSON.stringify(e))
+      }
+    }
+
+    /**
+     * Open
+     */
+    const open = () => {
+      ws.send(
+        JSON.stringify({
+          type: 'connect',
+          stream: stream,
+          token: this.auth.accessToken
+        })
+      )
+    }
+
+    const ws = new WebSocket(new URL('/api', this.endpoint.origin).href)
+
+    ws.on('close', close)
+    ws.on('error', error)
+    ws.on('message', message)
+    ws.on('open', open)
+
+    eventEmitter.addListener('disconnect', (code?: number, reason?: string) => {
+      ws.close(code, reason)
+    })
+
+    return eventEmitter
   }
 }

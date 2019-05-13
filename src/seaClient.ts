@@ -1,6 +1,26 @@
 import axios, { AxiosInstance } from 'axios'
 
 /**
+ * Account
+ */
+export interface Account {
+  createdAt: string
+  id: number
+  name: string
+  postsCount: number
+  screenName: string
+  updatedAt: string
+}
+
+/**
+ * Application
+ */
+export interface Application {
+  id: number
+  name: string
+}
+
+/**
  * Authorization
  */
 export interface Authorization {
@@ -12,10 +32,20 @@ export interface Authorization {
 }
 
 /**
- * Body
+ * File
  */
-export interface Body {
-  text: string
+export interface File {
+  id: number
+  name: string
+  variants: {
+    id: number
+    score: number
+    extension: string
+    type: string
+    size: number
+    url: string
+    mime: string
+  }
 }
 
 /**
@@ -28,14 +58,15 @@ export interface Post {
   text: string
   updatedAt: string
   user: User
+  files: File[]
 }
 
 /**
- * Application
+ * Post body
  */
-export interface Application {
-  id: number
-  name: string
+export interface PostBody {
+  text: string
+  fileIds?: number[]
 }
 
 /**
@@ -55,18 +86,6 @@ export interface User {
  */
 export interface UserSettings {
   name: string
-}
-
-/**
- * Account
- */
-export interface Account {
-  createdAt: string
-  id: number
-  name: string
-  postsCount: number
-  screenName: string
-  updatedAt: string
 }
 
 /**

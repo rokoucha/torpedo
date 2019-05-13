@@ -573,6 +573,12 @@ export default class SeaClient {
     ws.on('message', message)
     ws.on('open', open)
 
+    /**
+     * Disconnect
+     *
+     * @param {number} code close code
+     * @param {string} reason reason
+     */
     eventEmitter.addListener('disconnect', (code?: number, reason?: string) => {
       ws.close(code, reason)
     })

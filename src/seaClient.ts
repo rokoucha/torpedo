@@ -66,11 +66,11 @@ export class Application {
  * Authorization
  */
 export class Authorization {
-  public access_token: string
+  public accessToken: string
   public clientId: string
   public clientSecret: string
   public stateText: string
-  public token_type: string
+  public tokenType: string
 
   /**
    * Validate
@@ -79,12 +79,22 @@ export class Authorization {
    */
   private validate(authorization: Partial<Authorization>) {
     return $.obj({
-      access_token: $.str,
-      clientId: $.str,
-      clientSecret: $.str,
-      stateText: $.str,
-      token_type: $.str
+      accessToken: $.optional.str,
+      clientId: $.optional.str,
+      clientSecret: $.optional.str,
+      stateText: $.optional.str,
+      tokenType: $.optional.str
     }).throw(authorization)
+  }
+
+  /**
+   * Make state parameter fot authorize
+   * https://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-10.12
+   *
+   * @returns {string}
+   */
+  private getStateText(): string {
+    return crypto.randomBytes(8).toString('hex')
   }
 
   /**
@@ -95,11 +105,11 @@ export class Authorization {
   constructor(a: Partial<Authorization>) {
     const authorization = this.validate(a)
 
-    this.access_token = authorization.access_token
-    this.clientId = authorization.clientId
-    this.clientSecret = authorization.clientSecret
-    this.stateText = authorization.stateText
-    this.token_type = authorization.token_type
+    this.accessToken = authorization.accessToken || ''
+    this.clientId = authorization.clientId || ''
+    this.clientSecret = authorization.clientSecret || ''
+    this.stateText = authorization.stateText || this.getStateText()
+    this.tokenType = authorization.tokenType || 'Bearer'
   }
 }
 
@@ -332,55 +342,22 @@ export default class SeaClient {
    * Constructor
    *
    * @param {URL} endpoint API endpoint
-   * @param {Object} params Params
-   * @param {string} params.accessToken Application's acccess token
-   * @param {string} params.clientId Application's client id
-   * @param {string} params.clientSecret Application's client id
-   * @param {string} params.tokenType Access token type(default: Bearer)
+   * @param {Authorization} auth Params
    */
-  constructor(
-    endpoint: URL,
-    {
-      accessToken,
-      clientId,
-      clientSecret,
-      tokenType
-    }: {
-      accessToken?: string
-      clientId?: string
-      clientSecret?: string
-      tokenType?: string
-    } = {}
-  ) {
+  constructor(endpoint: URL, auth: Partial<Authorization>) {
     this.endpoint = endpoint
 
-    this.auth = new Authorization({
-      access_token: accessToken || '',
-      clientId: clientId || '',
-      clientSecret: clientSecret || '',
-      stateText: this.getStateText(),
-      token_type: tokenType || 'Bearer'
-    })
+    this.auth = new Authorization(auth)
 
     this.axios = axios.create({
       baseURL: this.endpoint.origin
     })
 
-    if (accessToken !== '') {
+    if (this.auth.accessToken !== '') {
       this.axios.defaults.headers.common['Authorization'] = `${
-        this.auth.token_type
-      } ${this.auth.access_token}`
+        this.auth.tokenType
+      } ${this.auth.accessToken}`
     }
-  }
-
-  /**
-   * Make state parameter fot authorize
-   * https://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-10.12
-   *
-   * @returns {string}
-   */
-  private getStateText(): string {
-    return crypto.randomBytes(8).toString('hex')
   }
 
   /**
@@ -423,12 +400,12 @@ export default class SeaClient {
       }
     )
 
-    this.auth.access_token = res.data.access_token
+    this.auth.accessToken = res.data.accessToken
     this.axios.defaults.headers.common['Authorization'] = `${
-      this.auth.token_type
-    } ${this.auth.access_token}`
+      this.auth.tokenType
+    } ${this.auth.accessToken}`
 
-    return res.data.access_token
+    return res.data.accessToken
   }
 
   /**

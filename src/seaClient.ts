@@ -2,6 +2,7 @@ import { ReadStream } from 'fs'
 import $ from 'cafy'
 import axios, { AxiosInstance } from 'axios'
 import FormData from 'form-data'
+import crypto from 'crypto'
 
 /**
  * Validator for cafy
@@ -379,8 +380,7 @@ export default class SeaClient {
    * @returns {string}
    */
   private getStateText(): string {
-    // TODO 安全で良い感じのランダムテキスト吐く奴考えて
-    return 'hoge'
+    return crypto.randomBytes(8).toString('hex')
   }
 
   /**

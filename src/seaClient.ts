@@ -384,9 +384,9 @@ export default class SeaClient {
   /**
    * Make authorize url
    *
-   * @returns {string}
+   * @returns {URL}
    */
-  public getAuthorizeUrl(): string {
+  public getAuthorizeUrl(): URL {
     if (this.auth.clientId === '') throw Error('clientId is not set')
 
     return new URL(
@@ -394,7 +394,7 @@ export default class SeaClient {
         this.auth.clientId
       }&response_type=code&state=${this.auth.stateText}`,
       this.endpoint
-    ).href
+    )
   }
 
   /**

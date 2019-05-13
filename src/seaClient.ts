@@ -502,8 +502,8 @@ export default class SeaClient {
     form.append('name', name)
     form.append('file', file)
 
-    if (folderId) form.append('folderId', folderId)
-    if (addDate) form.append('ifNameConflicted', 'add-date-string')
+    if (folderId !== undefined) form.append('folderId', folderId)
+    if (addDate === true) form.append('ifNameConflicted', 'add-date-string')
     else form.append('ifNameConflicted', 'error')
 
     const res = await this.axios.post<File>(`/api/v1/album/files`, form, {

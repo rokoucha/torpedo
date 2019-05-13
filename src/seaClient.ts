@@ -1,5 +1,7 @@
+import { ReadStream } from 'fs'
 import $ from 'cafy'
 import axios, { AxiosInstance } from 'axios'
+import FormData from 'form-data'
 
 /**
  * Validator for cafy
@@ -322,13 +324,13 @@ export class UserSettings {
  */
 export default class SeaClient {
   private axios: AxiosInstance
-  private endpoint: string
+  private endpoint: URL
   private auth: Authorization
 
   /**
    * Constructor
    *
-   * @param {string} endpoint API FQDN
+   * @param {URL} endpoint API endpoint
    * @param {Object} params Params
    * @param {string} params.accessToken Application's acccess token
    * @param {string} params.clientId Application's client id
@@ -336,7 +338,7 @@ export default class SeaClient {
    * @param {string} params.tokenType Access token type(default: Bearer)
    */
   constructor(
-    endpoint: string,
+    endpoint: URL,
     {
       accessToken,
       clientId,
@@ -349,7 +351,7 @@ export default class SeaClient {
       tokenType?: string
     } = {}
   ) {
-    this.endpoint = new URL(`https://${endpoint}`).href
+    this.endpoint = endpoint
 
     this.auth = new Authorization({
       access_token: accessToken || '',
@@ -360,7 +362,7 @@ export default class SeaClient {
     })
 
     this.axios = axios.create({
-      baseURL: this.endpoint
+      baseURL: this.endpoint.origin
     })
 
     if (accessToken !== '') {
@@ -393,7 +395,7 @@ export default class SeaClient {
       `/oauth/authorize?client_id=${
         this.auth.clientId
       }&response_type=code&state=${this.auth.stateText}`,
-      this.endpoint
+      this.endpoint.origin
     )
   }
 
@@ -480,13 +482,34 @@ export default class SeaClient {
   }
 
   /**
-   * Get my info
+   * Post file
    *
-   * @returns {Promise<User>}
+   * @param {string} name File name
+   * @param {ReadStream} file File stream
+   * @param {boolean} addDate Add date string when name conflict
+   * @param {number} folderId Folder Id
+   *
+   * @returns {Promise<File>}
    */
-  public async getMyInfo(): Promise<User> {
-    const res = await this.axios.get<User>(`/api/v1/account`)
+  public async postFile(
+    name: string,
+    file: ReadStream,
+    addDate: boolean,
+    folderId?: number
+  ): Promise<File> {
+    const form = new FormData()
 
-    return new User(res.data)
+    form.append('name', name)
+    form.append('file', file)
+
+    if (folderId) form.append('folderId', folderId)
+    if (addDate) form.append('ifNameConflicted', 'add-date-string')
+    else form.append('ifNameConflicted', 'error')
+
+    const res = await this.axios.post<File>(`/api/v1/album/files`, form, {
+      headers: form.getHeaders()
+    })
+
+    return new File(res.data)
   }
 }

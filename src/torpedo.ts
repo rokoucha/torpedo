@@ -1,5 +1,5 @@
-import { prompt } from 'enquirer'
 import { createReadStream } from 'fs'
+import { prompt } from 'enquirer'
 import Hydrobond, { PostBody } from './hydrobond/hydrobond'
 import readline from 'readline'
 

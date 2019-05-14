@@ -1,8 +1,8 @@
+import { EventEmitter } from 'events'
 import { ReadStream } from 'fs'
 import $ from 'cafy'
 import axios, { AxiosInstance } from 'axios'
 import crypto from 'crypto'
-import { EventEmitter } from 'events'
 import FormData from 'form-data'
 import WebSocket from 'ws'
 

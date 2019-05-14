@@ -1,10 +1,6 @@
-import cac from 'cac'
-import Hydrobond, {
-  Authorization,
-  PostBody,
-  UserSettings
-} from './hydrobond/hydrobond'
 import { authorize, post, stream } from './torpedo'
+import cac from 'cac'
+import Hydrobond, { Authorization } from './hydrobond/hydrobond'
 
 /**
  * Main

@@ -2,7 +2,6 @@
   "dependencies": {
     "axios": "^0.18.0",
     "cafy": "^15.1.1",
-    "commander": "^2.20.0",
     "form-data": "^2.3.3",
     "ws": "^7.0.0"
   },
@@ -15,7 +14,6 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/axios": "^0.14.0",
-    "@types/commander": "^2.12.2",
     "@types/form-data": "^2.2.1",
     "@types/node": "^12.0.0",
     "@types/ws": "^6.0.1",

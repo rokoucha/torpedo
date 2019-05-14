@@ -260,6 +260,38 @@ export class PostBody {
 }
 
 /**
+ * Token class
+ */
+export class Token {
+  public access_token: string
+  public token_type: string
+
+  /**
+   * Validate
+   *
+   * @param {Partial<Token>} token object
+   */
+  private validate(token: Partial<Token>) {
+    return $.obj({
+      access_token: $.str,
+      token_type: $.str
+    }).throw(token)
+  }
+
+  /**
+   * Constructor
+   *
+   * @param {Partial<Token>} t object
+   */
+  constructor(t: Partial<Token>) {
+    const token = this.validate(t)
+
+    this.access_token = token.access_token
+    this.token_type = token.token_type
+  }
+}
+
+/**
  * User class
  */
 export class User {
@@ -389,7 +421,7 @@ export default class Hydrobond {
     if (this.auth.clientId === '') throw Error('clientId is not set')
     if (this.auth.clientSecret === '') throw Error('clientSecret is not set')
 
-    const res = await this.axios.post<Authorization>(
+    const res = await this.axios.post<Token>(
       `/oauth/token?client_id=${this.auth.clientId}&response_type=code&state=${
         this.auth.stateText
       }`,
@@ -402,12 +434,14 @@ export default class Hydrobond {
       }
     )
 
-    this.auth.accessToken = res.data.accessToken
+    const token = new Token(res.data)
+
+    this.auth.accessToken = token.access_token
     this.axios.defaults.headers.common['Authorization'] = `${
       this.auth.tokenType
     } ${this.auth.accessToken}`
 
-    return res.data.accessToken
+    return this.auth.accessToken
   }
 
   /**

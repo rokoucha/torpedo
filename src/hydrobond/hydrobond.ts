@@ -7,7 +7,7 @@ import FormData from 'form-data'
 import WebSocket from 'ws'
 
 /**
- * Validator for cafy
+ * Validator for Hydrobond
  */
 class Validator {
   /**
@@ -333,9 +333,9 @@ export class UserSettings {
 }
 
 /**
- * SeaClient
+ * Hydrobond main class
  */
-export default class SeaClient {
+export default class Hydrobond {
   private axios: AxiosInstance
   private endpoint: URL
   private auth: Authorization
@@ -493,7 +493,7 @@ export default class SeaClient {
   }
 
   /**
-   * Stream
+   * Connect to Stream with WebSocket
    *
    * @param {string} stream Stream name
    *

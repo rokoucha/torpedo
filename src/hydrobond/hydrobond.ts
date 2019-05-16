@@ -339,7 +339,8 @@ export class User {
  * User settings
  */
 export class UserSettings {
-  public name: string
+  public avatarFileId?: number
+  public name?: string
 
   /**
    * Validate
@@ -348,7 +349,8 @@ export class UserSettings {
    */
   private validate(userSettings: Partial<UserSettings>) {
     return $.obj({
-      name: $.str.range(1, 20)
+      avatarFileId: $.optional.num,
+      name: $.optional.str.range(1, 20)
     }).throw(userSettings)
   }
 
@@ -360,6 +362,7 @@ export class UserSettings {
   constructor(u: Partial<UserSettings>) {
     const userSettings = this.validate(u)
 
+    this.avatarFileId = userSettings.avatarFileId
     this.name = userSettings.name
   }
 }

@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs'
 import { prompt } from 'enquirer'
-import Hydrobond, { PostBody } from './hydrobond/hydrobond'
+import Hydrobond, { PostBody, Post } from './hydrobond/hydrobond'
 import readline from 'readline'
 
 /**
@@ -67,7 +67,7 @@ export const stream = async (hydrobond: Hydrobond): Promise<void> => {
   socket.addListener('connect', () => {
     console.log('Connected!')
   })
-  socket.addListener('message', post => {
+  socket.addListener('message', (post: Post) => {
     console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
   })
 
@@ -82,4 +82,15 @@ export const stream = async (hydrobond: Hydrobond): Promise<void> => {
     setTimeout(loop, 10000)
   }
   loop()
+}
+
+/**
+ * timeline
+ */
+export const timeline = async (hydrobond: Hydrobond): Promise<void> => {
+  const posts = await hydrobond.getTimeline()
+
+  posts.forEach((post: Post) => {
+    console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
+  })
 }

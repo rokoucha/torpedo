@@ -1,4 +1,4 @@
-import { authorize, post, stream } from './torpedo'
+import { authorize, post, stream, timeline } from './torpedo'
 import cac from 'cac'
 import Hydrobond, { Authorization } from './hydrobond/hydrobond'
 
@@ -35,6 +35,11 @@ const main = async () => {
     })
 
   // Timeline
+  cli.command('timeline', 'Show timeline').action(() => {
+    timeline(hydrobond)
+  })
+
+  // Timeline steam
   cli.command('stream', 'Show timeline with WebSocket').action(() => {
     stream(hydrobond)
   })

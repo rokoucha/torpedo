@@ -295,6 +295,7 @@ export class Token {
  * User class
  */
 export class User {
+  public avatarFile: File
   public createdAt: Date
   public id: number
   public name: string
@@ -309,6 +310,7 @@ export class User {
    */
   private validate(account: Partial<User>) {
     return $.obj({
+      avatarFile: $.any,
       createdAt: Validator.isValidDate,
       id: $.num,
       name: $.str.range(1, 20),
@@ -326,6 +328,7 @@ export class User {
   constructor(a: Partial<User>) {
     const account = this.validate(a)
 
+    this.avatarFile = new File(account.avatarFile)
     this.createdAt = new Date(account.createdAt)
     this.id = account.id
     this.name = account.name

@@ -374,23 +374,30 @@ export class UserSettings {
  * Hydrobond main class
  */
 export default class Hydrobond {
-  private axios: AxiosInstance
-  private endpoint: URL
+  private apiEndpoint: URL
   private auth: Authorization
+  private axios: AxiosInstance
+  private oauthEndpoint: URL
 
   /**
    * Constructor
    *
-   * @param {URL} endpoint API endpoint
+   * @param {URL} apiEndpoint API endpoint
+   * @param {URL} oauthEndpoint API endpoint
    * @param {Authorization} auth Params
    */
-  constructor(endpoint: URL, auth: Partial<Authorization>) {
-    this.endpoint = endpoint
+  constructor(
+    apiEndpoint: URL,
+    oauthEndpoint: URL,
+    auth: Partial<Authorization>
+  ) {
+    this.apiEndpoint = apiEndpoint
+    this.oauthEndpoint = oauthEndpoint
 
     this.auth = new Authorization(auth)
 
     this.axios = axios.create({
-      baseURL: this.endpoint.origin
+      baseURL: this.apiEndpoint.href
     })
 
     if (this.auth.accessToken !== '') {
@@ -409,10 +416,10 @@ export default class Hydrobond {
     if (this.auth.clientId === '') throw Error('clientId is not set')
 
     return new URL(
-      `/oauth/authorize?client_id=${
-        this.auth.clientId
-      }&response_type=code&state=${this.auth.stateText}`,
-      this.endpoint.origin
+      `/authorize?client_id=${this.auth.clientId}&response_type=code&state=${
+        this.auth.stateText
+      }`,
+      this.oauthEndpoint.origin
     )
   }
 
@@ -427,10 +434,10 @@ export default class Hydrobond {
     if (this.auth.clientId === '') throw Error('clientId is not set')
     if (this.auth.clientSecret === '') throw Error('clientSecret is not set')
 
-    const res = await this.axios.post<Token>(
-      `/oauth/token?client_id=${this.auth.clientId}&response_type=code&state=${
-        this.auth.stateText
-      }`,
+    const res = await axios.post<Token>(
+      `${this.oauthEndpoint.href}/token?client_id=${
+        this.auth.clientId
+      }&response_type=code&state=${this.auth.stateText}`,
       {
         client_id: this.auth.clientId,
         client_secret: this.auth.clientSecret,
@@ -458,7 +465,7 @@ export default class Hydrobond {
    * @returns {Promise<Post>}
    */
   public async post(post: PostBody): Promise<Post> {
-    const res = await this.axios.post<Post>('/api/v1/posts', post)
+    const res = await this.axios.post<Post>('/v1/posts', post)
 
     return new Post(res.data)
   }
@@ -482,7 +489,7 @@ export default class Hydrobond {
     if (count !== undefined && count < 1)
       throw new Error('count must be greater than or equal to 1')
 
-    const res = await this.axios.get(`/api/v1/timelines/public`, {
+    const res = await this.axios.get(`/v1/timelines/public`, {
       params: {
         count,
         sinceId,
@@ -501,7 +508,7 @@ export default class Hydrobond {
    * @returns {Promise<User>}
    */
   public async postUserSettings(setting: UserSettings): Promise<User> {
-    const res = await this.axios.patch<User>(`/api/v1/account`, setting)
+    const res = await this.axios.patch<User>(`/v1/account`, setting)
 
     return new User(res.data)
   }
@@ -531,7 +538,7 @@ export default class Hydrobond {
     if (addDate === true) form.append('ifNameConflicted', 'add-date-string')
     else form.append('ifNameConflicted', 'error')
 
-    const res = await this.axios.post<File>(`/api/v1/album/files`, form, {
+    const res = await this.axios.post<File>(`/v1/album/files`, form, {
       headers: form.getHeaders()
     })
 
@@ -612,7 +619,7 @@ export default class Hydrobond {
       )
     }
 
-    const ws = new WebSocket(new URL('/api', this.endpoint.origin).href)
+    const ws = new WebSocket(this.apiEndpoint.href)
 
     ws.on('close', close)
     ws.on('error', error)

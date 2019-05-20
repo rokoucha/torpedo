@@ -466,12 +466,17 @@ export default class Hydrobond {
   /**
    * Get timeline
    *
-   * @param {number} sinceId id
-   * @param {number} count count
+   * @param {number|undefined} count count
+   * @param {number|undefined} sinceId since
+   * @param {number|undefined} maxId max
    *
    * @returns {Promise<Post[]>}
    */
-  public async getTimeline(sinceId?: number, count?: number): Promise<Post[]> {
+  public async getTimeline(
+    count?: number,
+    sinceId?: number,
+    maxId?: number
+  ): Promise<Post[]> {
     if (count !== undefined && count > 100)
       throw new Error('count must be less than or equal to 100')
     if (count !== undefined && count < 1)
@@ -479,8 +484,9 @@ export default class Hydrobond {
 
     const res = await this.axios.get(`/api/v1/timelines/public`, {
       params: {
+        count,
         sinceId,
-        count
+        maxId
       }
     })
 

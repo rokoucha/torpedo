@@ -1,11 +1,11 @@
 import { authorize, post, stream, timeline } from './torpedo'
 import cac from 'cac'
-import Hydrobond, { Authorization } from './hydrobond/hydrobond'
+import Hydrobond, { Authorization } from 'hydrobond'
 
 /**
  * Main
  */
-const main = async () => {
+const main = async (): Promise<void> => {
   // Config
   const CONFIG = {
     API_ENDPOINT: new URL(process.env.TORPEDO_SEA_API_ENDPOINT || ''),
@@ -29,29 +29,41 @@ const main = async () => {
   cli.help()
 
   // Authorize
-  cli.command('authorize', 'Authorize torpedo').action(async () => {
-    await authorize(hydrobond)
-  })
+  cli.command('authorize', 'Authorize torpedo').action(
+    async (): Promise<void> => {
+      await authorize(hydrobond)
+    }
+  )
 
   // Post
   cli
     .command('post [text]', 'Post to sea')
     .option('--file <file>', 'Attachments')
-    .action(async (text, options) => {
-      await post(hydrobond, text, options)
-    })
+    .action(
+      async (text, options): Promise<void> => {
+        await post(hydrobond, text, options)
+      }
+    )
 
   // Timeline
-  cli.command('timeline', 'Show timeline').action(async () => {
-    await timeline(hydrobond)
-  })
+  cli.command('timeline', 'Show timeline').action(
+    async (): Promise<void> => {
+      await timeline(hydrobond)
+    }
+  )
 
   // Timeline steam
-  cli.command('stream', 'Show timeline with WebSocket').action(async () => {
-    await stream(hydrobond)
-  })
+  cli.command('stream', 'Show timeline with WebSocket').action(
+    async (): Promise<void> => {
+      await stream(hydrobond)
+    }
+  )
 
   cli.parse()
 }
 
-main().catch(e => console.log(e))
+main().catch(
+  (e): void => {
+    console.log(e)
+  }
+)

@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs'
 import { prompt } from 'enquirer'
-import Hydrobond, { PostBody, Post } from './hydrobond/hydrobond'
+import Hydrobond, { PostBody, Post } from 'hydrobond'
 import readline from 'readline'
 
 /**
@@ -21,13 +21,27 @@ export const authorize = async (hydrobond: Hydrobond): Promise<void> => {
 }
 
 /**
+ * Post file
+ */
+export const postFile = async (
+  hydrobond: Hydrobond,
+  fileName: string
+): Promise<number> => {
+  const file = createReadStream(fileName)
+
+  const res = await hydrobond.postFile(fileName, file, true)
+
+  return res.id
+}
+
+/**
  * Post
  */
 export const post = async (
   hydrobond: Hydrobond,
   text: string,
   options: {
-    '--': Array<any>
+    '--': any[]
     file?: string
   }
 ): Promise<void> => {
@@ -44,41 +58,36 @@ export const post = async (
 }
 
 /**
- * Post file
- */
-export const postFile = async (
-  hydrobond: Hydrobond,
-  fileName: string
-): Promise<number> => {
-  const file = createReadStream(fileName)
-
-  const res = await hydrobond.postFile(fileName, file, true)
-
-  return res.id
-}
-
-/**
  * stream
  */
 export const stream = async (hydrobond: Hydrobond): Promise<void> => {
   const socket = hydrobond.stream('v1/timelines/public')
   console.log('oppening...')
 
-  socket.addListener('connect', () => {
-    console.log('Connected!')
-  })
-  socket.addListener('message', (post: Post) => {
-    console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
-  })
-
-  socket.addListener('close', () =>
-    setTimeout(() => {
-      console.log('Reconnecting...')
-      stream(hydrobond)
-    }, 1000)
+  socket.addListener(
+    'connect',
+    (): void => {
+      console.log('Connected!')
+    }
+  )
+  socket.addListener(
+    'message',
+    (post: Post): void => {
+      console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
+    }
   )
 
-  const loop = () => {
+  socket.addListener(
+    'close',
+    (): void => {
+      setTimeout((): void => {
+        console.log('Reconnecting...')
+        stream(hydrobond)
+      }, 1000)
+    }
+  )
+
+  const loop = (): void => {
     setTimeout(loop, 10000)
   }
   loop()
@@ -90,7 +99,9 @@ export const stream = async (hydrobond: Hydrobond): Promise<void> => {
 export const timeline = async (hydrobond: Hydrobond): Promise<void> => {
   const posts = await hydrobond.getTimeline()
 
-  posts.forEach((post: Post) => {
-    console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
-  })
+  posts.forEach(
+    (post: Post): void => {
+      console.log(`${post.user.name}(${post.user.screenName}): ${post.text}`)
+    }
+  )
 }
